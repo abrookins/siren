@@ -1,3 +1,4 @@
-git+git://github.com/scipy/scipy.git#egg=scipy-devnumpy==1.6.2
+numpy==1.6.2
+git+git://github.com/scipy/scipy.git#egg=scipy-dev
 GDAL==1.9.1
 Flask==0.8

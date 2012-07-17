@@ -18,8 +18,8 @@ app.config.from_object('default_settings')
 
 def get_points_nearby(points, point):
     """
-    Given a list of coordinates in `points`, find the nearest 250 points
-    within 1/2 a mile of `point`.
+    Given a list of coordinate tuples in `points`, find the nearest 250 points
+    within 1/2 a mile of the tuple `point`.
     """
     tree = cKDTree(points)
     # Find a maximum of 250 points with crimes within approximately 1/2 a mile.
@@ -48,9 +48,7 @@ class PortlandCrimeTracker(object):
         """
         Load crime data.
 
-        TODO: In the event that this class becomes a base class for extensible
-        crime mapping, the from and two coordinate systems should be encoded as
-        class variables, perhaps.
+        TODO: `from` and `to` coordinate systems as class variables?
         """
         crimes = {}
         skipped = 0
@@ -75,7 +73,7 @@ class PortlandCrimeTracker(object):
                     coord = transformation.TransformPoint(x, y)
                     # The order here (1, 0) is intended.
                     point = (coord[1], coord[0])
-                except TypeError as e:
+                except TypeError:
                     skipped += 1
                 else:
                     row.append(point)
@@ -139,7 +137,6 @@ def crime_stats():
 def crimes():
     point = flask.request.args.get('point', '').split(',')
     nearby_crimes = _crimes.get_crimes_nearby(point)
-    stats = _crimes.get_stats_for_crimes(nearby_crimes)
     return flask.jsonify(result={'nearby': nearby_crimes})
 
 
