@@ -38,7 +38,10 @@
 
     function reportError(err) {
         console.log(err);
+        alert('Could not get your location. Try enabling location services.')
     }
 
-    navigator.geolocation.getCurrentPosition(getCrimes, reportError);
+    $(document).ready(function () {
+        navigator.geolocation.getCurrentPosition(getCrimes, reportError);
+    });
 })();
