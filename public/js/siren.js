@@ -12,7 +12,7 @@
     }
 
     function getCrimes(loc) {
-        $.get('http://localhost:5000/crime_stats?point=' + loc.coords.latitude + ',' + loc.coords.longitude, function(data) {
+        $.get('/api/crime_stats?point=' + loc.coords.latitude + ',' + loc.coords.longitude, function(data) {
 
             $.each(data.result.stats, function () {
                 var crime = this[0];
