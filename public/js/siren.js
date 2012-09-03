@@ -28,7 +28,6 @@
 
                 $('<td/>').text(crime).appendTo(tr);
                 $('<td/>').text(numCrimes).appendTo(tr);
-                $('<td/>').appendTo(tr);
             });
 
             getMap(loc.coords);
