@@ -10,4 +10,5 @@ def deploy():
     api.local('git push origin master')
 
     with api.cd(DEPLOY_DIR):
+       api.run('git pull origin master')
        api.run('touch app.wsgi')
