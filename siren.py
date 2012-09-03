@@ -20,7 +20,7 @@ if app.config['DEBUG']:
 _crimes = PortlandCrimeTracker()
 
 
-@app.route('/crime_stats')
+@app.route('/crime/stats')
 def crime_stats():
     point = flask.request.args.get('point', '').split(',')
     nearby_crimes = _crimes.get_crimes_nearby(point)
@@ -28,7 +28,7 @@ def crime_stats():
     return flask.jsonify(result={'stats': stats})
 
 
-@app.route('/nearby_crimes')
+@app.route('/crime/nearby')
 def crimes():
     point = flask.request.args.get('point', '').split(',')
     nearby_crimes = _crimes.get_crimes_nearby(point)
