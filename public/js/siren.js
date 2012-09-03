@@ -6,13 +6,12 @@
         var imgUrl="http://maps.googleapis.com/maps/api/staticmap?center="
             +latlon+"&zoom=14&size="+width+"x200&sensor=false&markers=color:blue%7C"
             +latlon+'&scale=2';
-        console.log(imgUrl);
 
         $('#map').html("<img src='"+imgUrl+"' />");
     }
 
     function getCrimes(loc) {
-        $.get('/api/crime_stats?point=' + loc.coords.latitude + ',' + loc.coords.longitude, function(data) {
+        $.get('/crime_stats?point=' + loc.coords.latitude + ',' + loc.coords.longitude, function(data) {
 
             $.each(data.result.stats, function () {
                 var crime = this[0];
@@ -27,8 +26,8 @@
 
                 var tr = $('<tr/>').appendTo($('#crimes')).addClass(colorClass);
 
-                $('<td/>').text(numCrimes).appendTo(tr);
                 $('<td/>').text(crime).appendTo(tr);
+                $('<td/>').text(numCrimes).appendTo(tr);
                 $('<td/>').appendTo(tr);
             });
 
