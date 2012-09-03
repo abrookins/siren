@@ -14,6 +14,10 @@
       body {
         padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
       }
+
+      .bs-docs-separator {
+        margin: 40px 0 39px;
+      }
     </style>
     <link href="css/bootstrap-responsive.css" rel="stylesheet">
 
@@ -44,7 +48,8 @@
           <div class="nav-collapse collapse">
             <ul class="nav">
               <li class="active"><a href="#">Home</a></li>
-              <li><a href="#about">About</a></li>
+              <li><a href="#location">Your Location</a></li>
+              <li><a href="#summary">Crime Summary</a></li>
             </ul>
           </div><!--/.nav-collapse -->
         </div>
@@ -52,21 +57,37 @@
     </div>
 
     <div class="container">
+      <h2>About</h2>
+      <p>This site finds crime data from 2011 for a half-mile radius around your current location. For it to work, you must agree to share your location when visiting the site.</p>
+
+      <a name="location"></a>
+      <hr class="bs-docs-separator">
+
       <h2>Your Location</h2>
       <div id="map"></div>
+
+      <a name="summary"></a>
+      <hr class="bs-docs-separator">
 
       <h2>Summary</h2>
       <p>Summary of crimes within a half-mile radius of your location.</p>
       <table class="table table-hover" id="crimes">
         <thead>
         <tr>
-            <td><strong>Crime</strong></td>
+            <td><strong>Crime (<a href="http://www.portlandonline.com/police/index.cfm?c=29825&a=28509">definitions</a>)</strong></td>
             <td><strong># in 2011</strong></td>
         </tr>
         </thead>
       </table>
-
     </div> <!-- /container -->
+
+    <hr class="bs-docs-separator">
+
+    <footer>
+      <div class="container">
+          <p>Developed by and copyright 2012 <a href="http://andrewbrookins.com">Andrew Brookins</a>. Data provided generously by the City of Portland and downloaded <a href="http://www.civicapps.org/datasets">here</a>.</p>
+      </div>
+    </footer>
 
     <!-- Le javascript
     ================================================== -->
