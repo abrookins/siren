@@ -11,4 +11,4 @@ def deploy():
 
     with api.cd(DEPLOY_DIR):
        api.run('git pull origin master')
-       api.run('touch app.wsgi')
+       api.run('supervisorctl restart siren')
