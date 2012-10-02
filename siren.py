@@ -2,7 +2,7 @@ import flask
 import os
 
 from util import PortlandCrimeTracker
-
+from decorators import jsonp
 
 app = flask.Flask(__name__)
 app.config.from_object('default_settings')
@@ -21,6 +21,7 @@ _crimes = PortlandCrimeTracker()
 
 
 @app.route('/crime/stats')
+@jsonp
 def crime_stats():
     point = flask.request.args.get('point', '').split(',')
     nearby_crimes = _crimes.get_crimes_nearby(point)
@@ -29,6 +30,7 @@ def crime_stats():
 
 
 @app.route('/crime/nearby')
+@jsonp
 def crimes():
     point = flask.request.args.get('point', '').split(',')
     nearby_crimes = _crimes.get_crimes_nearby(point)
