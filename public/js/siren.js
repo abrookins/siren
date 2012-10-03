@@ -11,26 +11,35 @@
     }
 
     function getCrimes(loc) {
-        $.get('/crime/stats?point=' + loc.coords.latitude + ',' + loc.coords.longitude, function(data) {
+        var coords = loc.coords;
+        var url = '/crime/stats?point=' + coords.latitude + ',' + coords.longitude;
+        $.ajax({
+            url: url,
+            type: "GET",
+            dataType: "jsonp",
+            success: function(data) {
+                 $.each(data.result.stats, function () {
+                    var crime = this[0];
+                    var numCrimes = this[1];
+                    var colorClass = "success";
 
-            $.each(data.result.stats, function () {
-                var crime = this[0];
-                var numCrimes = this[1];
-                var colorClass = "success";
+                    if (numCrimes > 25 && numCrimes <= 100) {
+                        colorClass = 'info';
+                    } else if (numCrimes > 100) {
+                        colorClass = 'error';
+                    }
 
-                if (numCrimes > 25 && numCrimes <= 100) {
-                    colorClass = 'info';
-                } else if (numCrimes > 100) {
-                    colorClass = 'error';
-                }
+                    var tr = $('<tr/>').appendTo($('#crimes')).addClass(colorClass);
 
-                var tr = $('<tr/>').appendTo($('#crimes')).addClass(colorClass);
+                    $('<td/>').text(crime).appendTo(tr);
+                    $('<td/>').text(numCrimes).appendTo(tr);
+                });
 
-                $('<td/>').text(crime).appendTo(tr);
-                $('<td/>').text(numCrimes).appendTo(tr);
-            });
-
-            getMap(loc.coords);
+                getMap(loc.coords);
+            },
+            error: function() {
+                alert("Could not contact server! Try again later.");
+            }
         });
     }
 
