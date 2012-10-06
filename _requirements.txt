@@ -1,3 +1,4 @@
+distutils
 numpy
 scipy
 # You need GDAL, but installing it via pip doesn't work for me.
