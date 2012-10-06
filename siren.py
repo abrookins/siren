@@ -3,7 +3,7 @@ import os
 
 from flask.ext.cache import Cache
 
-from util import PortlandCrimeTracker
+from crime_tracker import PortlandCrimeTracker
 from decorators import jsonp
 
 app = flask.Flask(__name__)
