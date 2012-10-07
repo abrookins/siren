@@ -2,6 +2,6 @@
 #scipy
 # You need GDAL, but installing it via pip doesn't work for me.
 # GDAL==1.9.1
-#Flask==0.8
-#Flask-Cache==0.8.0
+Flask==0.8
+Flask-Cache==0.8.0
 ./
