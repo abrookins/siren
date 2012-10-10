@@ -3,7 +3,7 @@ import os
 
 from flask.ext.cache import Cache
 
-from crime_tracker import PortlandCrimeTracker
+from crime_tracker import PortlandCrimeTracker, make_hour_filter
 from decorators import jsonp
 
 app = flask.Flask(__name__)
@@ -23,47 +23,39 @@ if app.config['DEBUG']:
 _crimes = PortlandCrimeTracker()
 
 
-@cache.memoize()
-def _get_crimes_nearby(point):
-    """
-    A wrapper around `PortlandCrimeTracker.get_crimes_nearby` that we can
-    memoize.
-    """
-    return _crimes.get_crimes_nearby(point)
+def get_point(latitude, longitude):
+     try:
+        latitude = float(latitude)
+        longitude = float(longitude)
+     except ValueError:
+        flask.abort(404)
+
+     return latitude, longitude
 
 
-@cache.memoize()
-def _get_stats_for_crimes(crimes):
-    """
-    A wrapper around `PortlandCrimeTracker.get_stats_for_crimes` that we can
-    memoize.
-    """
-    return _crimes.get_stats_for_crimes(crimes)
-
-
-def _get_point():
-    """
-    Get a lat/long pair from the current request, passed as the `point` GET
-    parameter.
-    """
-    return flask.request.args.get('point', '').split(',')
-
-
-@app.route('/crime/stats')
+@app.route('/crimes/near/<latitude>,<longitude>/stats')
 @jsonp
-def crime_stats():
-    point = _get_point()
-    nearby_crimes = _get_crimes_nearby(point)
-    stats = _get_stats_for_crimes(nearby_crimes)
+def crime_stats(latitude, longitude):
+    point = get_point(latitude, longitude)
+    nearby_crimes = _crimes.get_crimes_nearby(point)
+    stats = _crimes.get_stats_for_crimes(nearby_crimes)
     return flask.jsonify(result={'stats': stats})
 
 
-@app.route('/crime/nearby')
+@app.route('/crimes/near/<latitude>,<longitude>/filter/hour/<int:hour>/stats')
 @jsonp
-def crimes():
-    point = _get_point()
-    nearby_crimes = _get_crimes_nearby(point)
-    return flask.jsonify(result={'nearby': nearby_crimes})
+def crime_stats_near_time(latitude, longitude, hour):
+    """
+    Get stats for crimes near a given point, around the time of a given hour.
+
+    TODO: Consider a better approach, perhaps parsing dates from crime data into
+    `datetime.datetime`.
+    """
+    point = get_point(latitude, longitude)
+    time_filter = make_hour_filter(hour)
+    nearby_crimes = _crimes.get_crimes_nearby(point, filters=[time_filter])
+    stats = _crimes.get_stats_for_crimes(nearby_crimes)
+    return flask.jsonify(result={'stats': stats})
 
 
 if __name__ == "__main__":

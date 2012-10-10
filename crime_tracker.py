@@ -6,6 +6,17 @@ from scipy.spatial import cKDTree
 from scipy import inf
 
 
+def make_hour_filter(hour):
+    """
+    Return True if the hour a crime was committed is within `hour`. For use
+    with the `filter()` builtin.
+    """
+    def inner(crime):
+        crime_hour = crime[2].split(':')[0]
+        return int(crime_hour) == hour
+    return inner
+
+
 class PortlandCrimeTracker(object):
 
     DEFAULT_DATABASE_NAME = 'db'
@@ -21,7 +32,7 @@ class PortlandCrimeTracker(object):
 
     def get_stats_for_crimes(self, crimes):
         """
-        Return the sum of different types of crimes found in `crimes`, a
+        Return the sums of different types of crimes found in `crimes`, a
         dictionary of coordinate points mapped to a list of crimes for that
         point.
 
@@ -56,14 +67,38 @@ class PortlandCrimeTracker(object):
 
         return point_neighbors
 
-    def get_crimes_nearby(self, point):
+    def filter(self, crimes, filters):
+        if filters:
+            for f in filters:
+                crimes = filter(f, crimes)
+        return crimes
+
+    def get_crimes_nearby(self, point, filters=None):
+        """
+        Return crimes near `point`, an iterable of (x, y) coordinates.
+
+        The result is a dictionary of crimes whose keys are the coordinates of
+        crime locations and values are lists of crimes, e.g.:
+
+            {
+                (1.2343, 34.2343): [crime1, crime2, crime3],
+                (2.3676 55.2341): [crime2, crime2]
+            }
+
+        If an iterable of callables is passed in `filters`, they will be applied
+        in order using a `filter()` to the resulting lists of crimes.
+        """
         nearby_crimes = collections.defaultdict(list)
 
-        if len(point) == 2:
-            nearby_points = self.get_points_nearby(point)
+        if 2 > len(point) < 2:
+            raise RuntimeError("Point must be an iterable of (x, y) coordinates")
 
-            for p in nearby_points:
-                point = ' '.join([str(p[0]), str(p[1])])
-                nearby_crimes[point].extend(self.crimes[p])
+        nearby_points = self.get_points_nearby(point)
+
+        for point in nearby_points:
+            crimes = self.crimes[point]
+            if filters:
+                crimes = self.filter(crimes, filters)
+            nearby_crimes[point].extend(crimes)
 
         return nearby_crimes

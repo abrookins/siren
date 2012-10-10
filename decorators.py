@@ -14,7 +14,7 @@ def jsonp(func):
         if callback:
             data = str(func(*args, **kwargs).data)
             content = str(callback) + '(' + data + ')'
-            mimetype = 'application/javascript'
+            mimetype = 'application/json'
             return current_app.response_class(content, mimetype=mimetype)
         else:
             return func(*args, **kwargs)

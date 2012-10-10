@@ -10,36 +10,57 @@
         $('#map').html("<img src='"+imgUrl+"' />");
     }
 
-    function getCrimes(loc) {
-        var coords = loc.coords;
-        var url = '/crime/stats?point=' + coords.latitude + ',' + coords.longitude;
+    function makeTable(tableEl, data) {
+        $.each(data.result.stats, function () {
+            var crime = this[0];
+            var numCrimes = this[1];
+            var colorClass = "success";
+
+            if (numCrimes > 25 && numCrimes <= 100) {
+                colorClass = 'info';
+            } else if (numCrimes > 100) {
+                colorClass = 'error';
+            }
+
+            var tr = $('<tr/>').appendTo($(tableEl)).addClass(colorClass);
+
+            $('<td/>').text(crime).appendTo(tr);
+            $('<td/>').text(numCrimes).appendTo(tr);
+    });
+    }
+
+    function makeApiRequest(opts) {
+        var coords = opts.loc.coords;
+
+        $('#longitude').text(coords.longitude);
+        $('#latitude').text(coords.latitude);
+
         $.ajax({
-            url: url,
+            url: opts.url,
             type: "GET",
             dataType: "jsonp",
             success: function(data) {
-                 $.each(data.result.stats, function () {
-                    var crime = this[0];
-                    var numCrimes = this[1];
-                    var colorClass = "success";
-
-                    if (numCrimes > 25 && numCrimes <= 100) {
-                        colorClass = 'info';
-                    } else if (numCrimes > 100) {
-                        colorClass = 'error';
-                    }
-
-                    var tr = $('<tr/>').appendTo($('#crimes')).addClass(colorClass);
-
-                    $('<td/>').text(crime).appendTo(tr);
-                    $('<td/>').text(numCrimes).appendTo(tr);
-                });
-
-                getMap(loc.coords);
+                makeTable(opts.tableEl, data);
+                getMap(opts.loc.coords);
             },
-            error: function() {
+            error: function(xhr, textStatus, errorThrown) {
+                console.log(xhr, textStatus, errorThrown)
                 alert("Could not contact server! Try again later.");
             }
+        });
+    }
+
+    function getCrimeStats(loc) {
+        var now = new Date();
+        makeApiRequest({
+            loc: loc,
+            url: '/crimes/near/' + loc.coords.latitude + ',' + loc.coords.longitude + '/stats',
+            tableEl: '#all-crimes-table'
+        });
+        makeApiRequest({
+            loc: loc,
+            url: '/crimes/near/' + loc.coords.latitude + ',' + loc.coords.longitude + '/filter/hour/' + now.getHours() + '/stats',
+            tableEl: '#crimes-hour-table'
         });
     }
 
@@ -49,6 +70,6 @@
     }
 
     $(document).ready(function () {
-        navigator.geolocation.getCurrentPosition(getCrimes, reportError);
+        navigator.geolocation.getCurrentPosition(getCrimeStats, reportError);
     });
 })();
