@@ -1,75 +1,88 @@
-(function() {
+(function () {
+    window.org == undefined ? window.org = {} : window.org;
+    window.org.pdxcrime == undefined ? window.org.pdxcrime = {} : window.org.pdxcrime;
 
-    function getMap(coords) {
-        var width = $('.container').width();
-        var latlon=coords.latitude+","+coords.longitude;
-        var imgUrl="http://maps.googleapis.com/maps/api/staticmap?center="
-            +latlon+"&zoom=14&size="+width+"x200&sensor=false&markers=color:blue%7C"
-            +latlon+'&scale=2&key=AIzaSyDSAgYb3WH9ukHVggvQKaBJUKNyGzh6MqQ';
-
-        $('#map').html("<img src='"+imgUrl+"' />");
+    function SirenApi(opts) {
+        this.baseUrl = opts.baseUrl;
+        _.bindAll(this);
     }
 
-    function makeTable(tableEl, data) {
-        $.each(data.result.stats, function () {
-            var crime = this[0];
-            var numCrimes = this[1];
-            var colorClass = "success";
+    SirenApi.prototype = {
+        initialize: function() {
+            navigator.geolocation.getCurrentPosition(
+                this.getCrimeStats, this.reportError);
+        },
 
-            if (numCrimes > 25 && numCrimes <= 100) {
-                colorClass = 'info';
-            } else if (numCrimes > 100) {
-                colorClass = 'error';
-            }
+        getMap: function (coords) {
+            var width = $('.container').width();
+            var latlon = coords.latitude + "," + coords.longitude;
+            var imgUrl = "http://maps.googleapis.com/maps/api/staticmap?center="
+                + latlon + "&zoom=14&size=" + width + "x200&sensor=false&markers=color:blue%7C"
+                + latlon + '&scale=2&key=AIzaSyDSAgYb3WH9ukHVggvQKaBJUKNyGzh6MqQ';
 
-            var tr = $('<tr/>').appendTo($(tableEl)).addClass(colorClass);
+            $('#map').html("<img src='" + imgUrl + "' />");
+        },
 
-            $('<td/>').text(crime).appendTo(tr);
-            $('<td/>').text(numCrimes).appendTo(tr);
-    });
-    }
+        makeTable: function (tableEl, data) {
+            $.each(data.result.stats, function () {
+                var crime = this[0];
+                var numCrimes = this[1];
+                var colorClass = "success";
 
-    function makeApiRequest(opts) {
-        var coords = opts.loc.coords;
+                if (numCrimes > 25 && numCrimes <= 100) {
+                    colorClass = 'info';
+                } else if (numCrimes > 100) {
+                    colorClass = 'error';
+                }
 
-        $('#longitude').text(coords.longitude);
-        $('#latitude').text(coords.latitude);
+                var tr = $('<tr/>').appendTo($(tableEl)).addClass(colorClass);
 
-        $.ajax({
-            url: opts.url,
-            type: "GET",
-            dataType: "jsonp",
-            success: function(data) {
-                makeTable(opts.tableEl, data);
-                getMap(opts.loc.coords);
-            },
-            error: function(xhr, textStatus, errorThrown) {
-                console.log(xhr, textStatus, errorThrown)
-                alert("Could not contact server! Try again later.");
-            }
-        });
-    }
+                $('<td/>').text(crime).appendTo(tr);
+                $('<td/>').text(numCrimes).appendTo(tr);
+            });
+        },
 
-    function getCrimeStats(loc) {
-        var now = new Date();
-        makeApiRequest({
-            loc: loc,
-            url: '/crimes/near/' + loc.coords.latitude + ',' + loc.coords.longitude + '/stats',
-            tableEl: '#all-crimes-table'
-        });
-        makeApiRequest({
-            loc: loc,
-            url: '/crimes/near/' + loc.coords.latitude + ',' + loc.coords.longitude + '/filter/hour/' + now.getHours() + '/stats',
-            tableEl: '#crimes-hour-table'
-        });
-    }
+        makeApiRequest: function (opts) {
+            var coords = opts.loc.coords;
+            var _this = this;
 
-    function reportError(err) {
-        console.log(err);
-        alert('Could not get your location. Try enabling location services.')
-    }
+            $('#longitude').text(coords.longitude);
+            $('#latitude').text(coords.latitude);
 
-    $(document).ready(function () {
-        navigator.geolocation.getCurrentPosition(getCrimeStats, reportError);
-    });
+            $.ajax({
+                url: opts.url,
+                type: "GET",
+                dataType: "jsonp",
+                success: function (data) {
+                    _this.makeTable(opts.tableEl, data);
+                    _this.getMap(opts.loc.coords);
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    console.log(xhr, textStatus, errorThrown);
+                    alert("Could not contact server! Try again later.");
+                }
+            });
+        },
+
+        getCrimeStats: function (loc) {
+            var now = new Date();
+            this.makeApiRequest({
+                loc: loc,
+                url: this.baseUrl + '/crimes/near/' + loc.coords.latitude + ',' + loc.coords.longitude + '/stats',
+                tableEl: '#all-crimes-table'
+            });
+            this.makeApiRequest({
+                loc: loc,
+                url: this.baseUrl + '/crimes/near/' + loc.coords.latitude + ',' + loc.coords.longitude + '/filter/hour/' + now.getHours() + '/stats',
+                tableEl: '#crimes-hour-table'
+            });
+        },
+
+        reportError: function (err) {
+            console.log(err);
+            alert('Could not get your location. Try enabling location services.')
+        }
+    };
+
+    window.org.pdxcrime.SirenApi = SirenApi;
 })();
