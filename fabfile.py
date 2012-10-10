@@ -1,19 +1,8 @@
 from fabric import api
 
-
-DEPLOY_DIR = '/home/andrew/apps/siren'
-
-
 @api.task
-@api.hosts('andrew@andrewbrookins.com')
-def deploy(install_reqs=False):
-    api.local('git push origin master')
+def deploy(sync_media=True):
+    api.local('git push heroku master')
 
-    with api.cd(DEPLOY_DIR):
-       api.run('git pull origin master')
-
-       if install_reqs:
-           api.run('export WORKON_HOME=~/envs && source virtualenvwrapper.sh '
-                   '&& workon siren && pip install -r requirements.txt')
-
-       api.sudo('supervisorctl restart siren')
+    if sync_media:
+        api.local('s3cmd sync public/ s3://pdxcrime.org/')
