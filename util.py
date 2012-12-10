@@ -1,4 +1,5 @@
 import cPickle
+import collections
 import csv
 import ogr
 import os
@@ -14,7 +15,11 @@ def open_data_file(filename, mode='r'):
 
 def get_crime_data(filename):
     """
-    Load Portland crime data.
+    Load Portland crime data from a CSV file ``filename``.
+
+    Returns a tuple: header (list of string column names), crimes (a dict in
+    which coordinate tuples map to lists of crimes, skipped (number of skipped
+    rows).
     """
     crimes = collections.defaultdict(list)
     skipped = 0
@@ -30,10 +35,13 @@ def get_crime_data(filename):
     transformation = ogr.osr.CoordinateTransformation(nad83, wgs84)
 
     r = csv.reader(open_data_file(filename))
+    header = None
 
     for i, row in enumerate(r):
-        if not i:
+        if i == 0:
+            header = row
             continue
+
         x, y = float(row[8]) if row[8] else 0, float(row[9] if row[9] else 0)
         if x and y:
             try:
@@ -46,11 +54,15 @@ def get_crime_data(filename):
                 row.append(point)
                 crimes[point].append(row)
 
-    return crimes, skipped
+    return header, crimes, skipped
 
 
 def make_crimes_db(filename='db'):
-    crimes,  skipped = get_crime_data('crime_incident_data.csv')
+    header, crimes, skipped = get_crime_data('crime_incident_data.csv')
 
     with open(filename, 'wb') as f:
-        cPickle.dump(crimes, f)
+        cPickle.dump({
+            'header': header, 'crimes': crimes
+        }, f)
+
+    print 'Saved database to: %s. Skipped %s rows.' % (filename, skipped)

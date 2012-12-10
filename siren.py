@@ -3,7 +3,7 @@ import os
 
 from flask.ext.cache import Cache
 
-from crime_tracker import PortlandCrimeTracker, make_hour_filter
+from crime_tracker import PortlandCrimeTracker
 from decorators import jsonp
 
 app = flask.Flask(__name__)
@@ -24,38 +24,42 @@ _crimes = PortlandCrimeTracker()
 
 
 def get_point(latitude, longitude):
-     try:
+    try:
         latitude = float(latitude)
         longitude = float(longitude)
-     except ValueError:
+    except ValueError:
         flask.abort(404)
 
-     return latitude, longitude
+    return latitude, longitude
 
 
-@app.route('/crimes/near/<latitude>,<longitude>/stats')
+def get_crimes(latitude, longitude):
+    point = get_point(latitude, longitude)
+    filters = {}
+
+    for filter, value in flask.request.args.items():
+        if filter in ['callback', '_']:
+            continue
+        filters[filter] = value
+
+    return _crimes.get_crimes_nearby(point, filters=filters)
+
+
+@app.route('/crime/stats/<latitude>,<longitude>')
 @jsonp
 def crime_stats(latitude, longitude):
-    point = get_point(latitude, longitude)
-    nearby_crimes = _crimes.get_crimes_nearby(point)
+    nearby_crimes = get_crimes(latitude, longitude)
     stats = _crimes.get_stats_for_crimes(nearby_crimes)
     return flask.jsonify(result={'stats': stats})
 
 
-@app.route('/crimes/near/<latitude>,<longitude>/filter/hour/<int:hour>/stats')
+@app.route('/crime/<latitude>,<longitude>')
 @jsonp
-def crime_stats_near_time(latitude, longitude, hour):
-    """
-    Get stats for crimes near a given point, around the time of a given hour.
-
-    TODO: Consider a better approach, perhaps parsing dates from crime data into
-    `datetime.datetime`.
-    """
-    point = get_point(latitude, longitude)
-    time_filter = make_hour_filter(hour)
-    nearby_crimes = _crimes.get_crimes_nearby(point, filters=[time_filter])
-    stats = _crimes.get_stats_for_crimes(nearby_crimes)
-    return flask.jsonify(result={'stats': stats})
+def crimes(latitude, longitude):
+    # Convert a dict with tuple-keys to a more JSON-friendly array of dicts.
+    crimes = [dict(crime=c, point=','.join(str(p))) for p, c in
+              get_crimes(latitude, longitude).items()]
+    return flask.jsonify(result={'crimes': crimes})
 
 
 if __name__ == "__main__":

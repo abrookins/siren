@@ -6,25 +6,44 @@ from scipy.spatial import cKDTree
 from scipy import inf
 
 
-def make_hour_filter(hour):
-    """
-    Return True if the hour a crime was committed is within `hour`. For use
-    with the `filter()` builtin.
-    """
-    def inner(crime):
-        crime_hour = crime[2].split(':')[0]
-        return int(crime_hour) == hour
-    return inner
-
-
 class PortlandCrimeTracker(object):
 
     DEFAULT_DATABASE_NAME = 'db'
 
     def __init__(self, db_filename=DEFAULT_DATABASE_NAME):
-        self.crimes = self.load_crimes_db(db_filename)
+        crime_db = self.load_crimes_db(db_filename)
+        self.crimes = crime_db['crimes']
+        self.header = crime_db['header']
         self.points = self.crimes.keys()
         self.crime_kdtree = cKDTree(self.points)
+
+        self.filters = {
+            'hour': self.make_hour_filter,
+            'default': self.make_text_filter
+        }
+
+    def make_hour_filter(self, column, hour):
+        """
+        Return True if the hour a crime was committed is within `hour`. For use
+        with the `filter()` builtin.
+        """
+        index = self.header.index('Report Time')
+
+        def inner(crime):
+            crime_hour = crime[index].split(':')[0]
+            return int(crime_hour) == int(hour)
+        return inner
+
+    def make_text_filter(self, field, value):
+        """
+        Create a function that tests for ``value`` in ``column`` of a row of
+        data, for use with the `filter()` builtin.
+        """
+        index = self.header.index(field)
+
+        def inner(crime):
+            return crime[index] == value
+        return inner
 
     def load_crimes_db(self, filename='db'):
         with open(filename) as f:
@@ -51,12 +70,12 @@ class PortlandCrimeTracker(object):
 
     def get_points_nearby(self, point, distance=250):
         """
-        Given a list of coordinate tuples in `points`, find the nearest 250 points
-        within 1/2 a mile of the tuple `point`.
+        Given a list of coordinate tuples in `points`, find the nearest 250
+        points within 1/2 a mile of the tuple `point`.
         """
 
-        # Find a maximum of 250 points with crimes within approximately 1/2 a mile.
-        # Note: 1/4 mile is .005, 1/2 mile is .01, full mile is .02.
+        # Find a maximum of 250 points with crimes within approximately 1/2 a
+        # mile. 1/4 mile is .005, 1/2 mile is .01, full mile is .02.
         distances, indices = self.crime_kdtree.query(point, k=distance,
                                                      distance_upper_bound=0.01)
         point_neighbors = []
@@ -68,9 +87,14 @@ class PortlandCrimeTracker(object):
         return point_neighbors
 
     def filter(self, crimes, filters):
+        """
+        Apply ``filters``, a dict of column names to values, to ``crimes``,
+        by looking up, for each filter, the filter function in ``self.filters``.
+        """
         if filters:
-            for f in filters:
-                crimes = filter(f, crimes)
+            for field, value in filters.items():
+                f = self.filters.get(field, None) or self.filters['default']
+                crimes = filter(f(field, value), crimes)
         return crimes
 
     def get_crimes_nearby(self, point, filters=None):
@@ -91,7 +115,8 @@ class PortlandCrimeTracker(object):
         nearby_crimes = collections.defaultdict(list)
 
         if 2 > len(point) < 2:
-            raise RuntimeError("Point must be an iterable of (x, y) coordinates")
+            raise RuntimeError(
+                "Point must be an iterable of (x, y) coordinates")
 
         nearby_points = self.get_points_nearby(point)
 
