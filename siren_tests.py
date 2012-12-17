@@ -4,7 +4,7 @@ import unittest
 import siren
 
 
-class TestSiren(unittest.TestCase):
+class SirenTests(unittest.TestCase):
 
     def setUp(self):
         siren.app.config['TESTING'] = True
@@ -49,6 +49,8 @@ class TestSiren(unittest.TestCase):
         resp = self.app.get('/crime/stats/45.521263,-122.698016?hour=1')
         data = json.loads(resp.data)
         stats = data['result']['stats']
+
+        self.assertFalse('errors' in data['result'])
 
         self.assertEqual(len(stats), 9)
         self.assertEqual(stats[0][0], 'Larceny')

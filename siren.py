@@ -42,24 +42,37 @@ def get_crimes(latitude, longitude):
             continue
         filters[filter] = value
 
-    return _crimes.get_crimes_nearby(point, filters=filters)
+    valid_filters, errors = _crimes.get_valid_filter(filters)
+
+    return _crimes.get_crimes_nearby(point, filters=valid_filters), errors
 
 
 @app.route('/crime/stats/<latitude>,<longitude>')
 @jsonp
 def crime_stats(latitude, longitude):
-    nearby_crimes = get_crimes(latitude, longitude)
+    nearby_crimes, errors = get_crimes(latitude, longitude)
     stats = _crimes.get_stats_for_crimes(nearby_crimes)
-    return flask.jsonify(result={'stats': stats})
+    data = {'stats': stats}
+
+    if errors:
+        data['errors'] = errors
+
+    return flask.jsonify(result=data)
 
 
 @app.route('/crime/<latitude>,<longitude>')
 @jsonp
 def crimes(latitude, longitude):
-    # Convert a dict with tuple-keys to a more JSON-friendly array of dicts.
-    crimes = [dict(crime=c, point=','.join(str(p))) for p, c in
-              get_crimes(latitude, longitude).items()]
-    return flask.jsonify(result={'crimes': crimes})
+    crimes, errors = get_crimes(latitude, longitude)
+
+    # JSON requires that object keys be strings, so convert tuples to strings.
+    crimes = [dict(crime=c, point=','.join(str(p))) for p, c in crimes.items()]
+    data = {'crimes': crimes}
+
+    if errors:
+        data['errors'] = errors
+
+    return flask.jsonify(result=data)
 
 
 if __name__ == "__main__":

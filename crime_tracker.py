@@ -1,6 +1,7 @@
 import collections
 import cPickle
 import itertools
+import datetime
 
 from scipy.spatial import cKDTree
 from scipy import inf
@@ -19,13 +20,14 @@ class PortlandCrimeTracker(object):
 
         self.filters = {
             'hour': self.make_hour_filter,
+            'weekday': self.make_weekday_filter,
             'default': self.make_text_filter
         }
 
-    def make_hour_filter(self, column, hour):
+    def make_hour_filter(self, column, hour=None):
         """
-        Return True if the hour a crime was committed is within `hour`. For use
-        with the `filter()` builtin.
+        Return True if the hour a crime was committed is within ``hour``. For
+        use with the `filter()` builtin.
         """
         index = self.header.index('Report Time')
 
@@ -34,12 +36,25 @@ class PortlandCrimeTracker(object):
             return int(crime_hour) == int(hour)
         return inner
 
-    def make_text_filter(self, field, value):
+    def make_weekday_filter(self, column, day=None):
+        """
+        Return True if the hour a crime was committed is within ``day``, an
+        integer representation of a day of the week (0 - 6).
+        For use with the `filter()` builtin.
+        """
+        index = self.header.index('Report Date')
+
+        def inner(crime):
+            crime_date = datetime.datetime.strptime(crime[index], '%m/%d/%Y')
+            return int(crime_date.weekday()) == int(day)
+        return inner
+
+    def make_text_filter(self, column, value):
         """
         Create a function that tests for ``value`` in ``column`` of a row of
         data, for use with the `filter()` builtin.
         """
-        index = self.header.index(field)
+        index = self.header.index(column)
 
         def inner(crime):
             return crime[index] == value
@@ -127,3 +142,16 @@ class PortlandCrimeTracker(object):
             nearby_crimes[point].extend(crimes)
 
         return nearby_crimes
+
+    def get_valid_filter(self, filters):
+        valid_filters = {}
+        errors = {}
+
+        for column, value in filters.items():
+            if not column in self.filters.keys() and not column in self.header:
+                errors[column] = 'The filter %s is not valid.' % column
+                continue
+
+            valid_filters[column] = value
+
+        return valid_filters, errors
