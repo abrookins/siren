@@ -57,12 +57,12 @@ def get_crime_data(filename):
     return header, crimes, skipped
 
 
-def make_crimes_db(filename='db'):
-    header, crimes, skipped = get_crime_data('crime_incident_data.csv')
+def make_crimes_db(db_filename='db', data_filename='crime_incident_data.csv'):
+    header, crimes, skipped = get_crime_data(data_filename)
 
-    with open(filename, 'wb') as f:
+    with open(db_filename, 'wb') as f:
         cPickle.dump({
             'header': header, 'crimes': crimes
         }, f)
 
-    print 'Saved database to: %s. Skipped %s rows.' % (filename, skipped)
+    print 'Saved database to: %s. Skipped %s rows.' % (db_filename, skipped)

@@ -83,19 +83,20 @@ class PortlandCrimeTracker(object):
         return sorted([(category, cat_sum) for category, cat_sum in sums.items()],
                       key=lambda x: x[1], reverse=True)
 
-    def get_points_nearby(self, point, distance=250):
+    def get_points_nearby(self, point, max_points=250):
         """
-        Given a list of coordinate tuples in `points`, find the nearest 250
-        points within 1/2 a mile of the tuple `point`.
+        Given a list of coordinate tuples in ``points``, find the nearest
+        points within 1/2 a mile of the tuple ``point``, to a maximum of
+        ``max_points``.
         """
 
-        # Find a maximum of 250 points with crimes within approximately 1/2 a
-        # mile. 1/4 mile is .005, 1/2 mile is .01, full mile is .02.
-        distances, indices = self.crime_kdtree.query(point, k=distance,
+        # Find crimes within approximately 1/2 a mile. 1/4 mile is .005,
+        # 1/2 mile is .01, full mile is .02.
+        distances, indices = self.crime_kdtree.query(point, k=max_points,
                                                      distance_upper_bound=0.01)
         point_neighbors = []
-        for index, distance in zip(indices, distances):
-            if distance == inf:
+        for index, max_points in zip(indices, distances):
+            if max_points == inf:
                 break
             point_neighbors.append(self.points[index])
 
