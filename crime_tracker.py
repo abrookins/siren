@@ -158,8 +158,8 @@ class PortlandCrimeTracker(object):
         """
         Given a list of filter names in ``filters``, return a tuple:
 
-        In the first position, a dictionary of valid filter functions found by
-        looking up the filter names in `self.filters`.
+        In the first position, a dictionary of valid filter names and values
+        found by looking up the filter names in `self.filters`.
 
         In the second position, a dictionary of errors containing a filter name
         and error message for any filter in ``filters`` not found in
