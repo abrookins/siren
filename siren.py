@@ -36,18 +36,20 @@ def get_point(latitude, longitude):
 def get_crimes(latitude, longitude):
     point = get_point(latitude, longitude)
     filters = {}
+    ignore = ['callback', '_']
 
-    for filter, value in flask.request.args.items():
-        if filter in ['callback', '_']:
+    for filter_name, value in flask.request.args.items():
+        if filter_name in ignore:
             continue
-        filters[filter] = value
+        filters[filter_name] = value
 
-    valid_filters, errors = _crimes.get_valid_filter(filters)
+    valid_filters, errors = _crimes.validate_filters(filters)
 
     return _crimes.get_crimes_nearby(point, filters=valid_filters), errors
 
 
 @app.route('/crime/stats/<latitude>,<longitude>')
+@cache.cached()
 @jsonp
 def crime_stats(latitude, longitude):
     nearby_crimes, errors = get_crimes(latitude, longitude)
@@ -61,6 +63,7 @@ def crime_stats(latitude, longitude):
 
 
 @app.route('/crime/<latitude>,<longitude>')
+@cache.cached()
 @jsonp
 def crimes(latitude, longitude):
     crimes, errors = get_crimes(latitude, longitude)

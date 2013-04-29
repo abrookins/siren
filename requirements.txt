@@ -1,6 +1,11 @@
 # You need GDAL to build the database, but installing it via pip doesn't work
 # for me and I haven't updated my buildpack to install it on Heroku.
 # GDAL==1.9.1
+
+# You need scipy, but since this project is deployed to Heroku, we can't
+# add the requirement here because we need to use a custom build-pack for scipy.
+# scipy==0.11.0
+
 Flask==0.8
 Flask-Cache==0.8.0
 ./

@@ -8,10 +8,17 @@ from scipy import inf
 
 
 class PortlandCrimeTracker(object):
-
     DEFAULT_DATABASE_NAME = 'db'
 
     def __init__(self, db_filename=DEFAULT_DATABASE_NAME):
+        """
+        Load crime data from ``filename``, a pickled dict whose keys are
+        coordinates in Portland where crimes occurred and whose values are
+        lists of dicts containing crime data.
+
+        Send the coordinates into a :class:`scipy.spatial.cKDTree` instance
+        so we can perform nearest-neighbor queries for crime data.
+        """
         crime_db = self.load_crimes_db(db_filename)
         self.crimes = crime_db['crimes']
         self.header = crime_db['header']
@@ -61,6 +68,9 @@ class PortlandCrimeTracker(object):
         return inner
 
     def load_crimes_db(self, filename='db'):
+        """
+        Load crime data from a pickle file at ``filename``.
+        """
         with open(filename) as f:
             return cPickle.load(f)
 
@@ -144,7 +154,17 @@ class PortlandCrimeTracker(object):
 
         return nearby_crimes
 
-    def get_valid_filter(self, filters):
+    def validate_filters(self, filters):
+        """
+        Given a list of filter names in ``filters``, return a tuple:
+
+        In the first position, a dictionary of valid filter functions found by
+        looking up the filter names in `self.filters`.
+
+        In the second position, a dictionary of errors containing a filter name
+        and error message for any filter in ``filters`` not found in
+        `self.filters`.
+        """
         valid_filters = {}
         errors = {}
 
