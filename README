@@ -5,4 +5,4 @@ max of 250 crimes.
 The service references crime data from the City of Portland, stored in a
 kd-tree using `scipy.spatial.cKDTree`.
 
-License: MIT. See LICENSE.txt.
+License: MIT. See LICENSE.
