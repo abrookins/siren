@@ -3,6 +3,6 @@ returns the number of crimes by category within 1/2 mile of the point, with a
 max of 250 crimes.
 
 The service references crime data from the City of Portland, stored in a
-kd-tree using `scipy.spatial.cKDTree`.
+k-d tree using `scipy.spatial.cKDTree`.
 
 License: MIT. See LICENSE.
