@@ -1,4 +1,3 @@
-locust
 # You need GDAL to build the database, but installing it via pip doesn't work
 # for me and I haven't updated my buildpack to install it on Heroku.
 # GDAL==1.9.1
