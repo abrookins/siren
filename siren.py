@@ -11,6 +11,12 @@ app.config.from_object('default_settings')
 app.config.from_envvar('SIREN_SETTINGS')
 cache = Cache(app)
 
+# Save profiling data if running in debug mode.
+if app.config['DEBUG']:
+    from werkzeug.contrib.profiler import ProfilerMiddleware
+    f = open('/tmp/profiler.log', 'a')
+    app.wsgi_app = ProfilerMiddleware(app.wsgi_app, f)
+
 
 _crimes = PortlandCrimeTracker()
 
