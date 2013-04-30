@@ -12,14 +12,6 @@ app.config.from_envvar('SIREN_SETTINGS')
 cache = Cache(app)
 
 
-# Serve static files if in debug mode.
-if app.config['DEBUG']:
-    from werkzeug import SharedDataMiddleware
-    app.wsgi_app = SharedDataMiddleware(app.wsgi_app, {
-      '/': os.path.join(os.path.dirname(__file__), 'public')
-    })
-
-
 _crimes = PortlandCrimeTracker()
 
 

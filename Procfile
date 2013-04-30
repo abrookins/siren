@@ -1,1 +1,1 @@
-web: python siren.py
+web: newrelic-admin run-program python siren.py

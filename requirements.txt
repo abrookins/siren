@@ -8,4 +8,5 @@
 
 Flask==0.8
 Flask-Cache==0.8.0
-./
+gunicorn==0.17.4
+newrelic
