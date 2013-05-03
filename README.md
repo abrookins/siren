@@ -24,7 +24,7 @@ Instructions for OS X using Homebrew (my local setup):
 
 You can run the app server locally with the Foreman gem:
 
-    `foreman run web`
+    foreman run web
 
 Defaults for $PORT and $WORKERS live in `.env`. You can also set those values
 as environment variables, which is where Heroku will read them from.
