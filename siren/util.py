@@ -17,7 +17,7 @@ def get_crime_data(filename):
     Load Portland crime data from a CSV file ``filename``.
 
     Returns a tuple: header (list of string column names), crimes (a dict in
-    which coordinate tuples map to lists of crimes, skipped (number of skipped
+    which coordinate tuples map to lists of crimes), skipped (number of skipped
     rows).
     """
     crimes = collections.defaultdict(list)
