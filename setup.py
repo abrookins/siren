@@ -1,9 +1,9 @@
-from distutils.core import setup
+from setuptools import setup, find_packages
 
 setup(
     name='siren',
     version='0.1',
-    packages=['scripts'],
+    packages=find_packages(),
     url='https://github.com/abrookins/siren',
     license='MIT',
     author='Andrew Brookins',

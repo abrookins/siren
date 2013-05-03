@@ -3,3 +3,4 @@
 .ropeproject
 cache/*
 .rbenv-version
+siren.egg-info/

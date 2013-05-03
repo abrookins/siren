@@ -1,7 +1,6 @@
 import json
-import unittest
-
 import siren
+import unittest
 
 
 class SirenTests(unittest.TestCase):

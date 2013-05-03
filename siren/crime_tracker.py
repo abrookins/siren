@@ -2,9 +2,11 @@ import collections
 import cPickle
 import itertools
 import datetime
+import os
 
 from scipy.spatial import cKDTree
 from scipy import inf
+from siren import default_settings
 
 
 class PortlandCrimeTracker(object):
@@ -19,7 +21,8 @@ class PortlandCrimeTracker(object):
         Send the coordinates into a :class:`scipy.spatial.cKDTree` instance
         so we can perform nearest-neighbor queries for crime data.
         """
-        crime_db = self.load_crimes_db(db_filename)
+        crime_db = self.load_crimes_db(
+            os.path.join(default_settings.DATA_DIR, db_filename))
         self.crimes = crime_db['crimes']
         self.header = crime_db['header']
         self.points = self.crimes.keys()
@@ -71,7 +74,7 @@ class PortlandCrimeTracker(object):
         """
         Load crime data from a pickle file at ``filename``.
         """
-        with open(filename) as f:
+        with open(os.path.join('data', filename)) as f:
             return cPickle.load(f)
 
     def get_stats_for_crimes(self, crimes):
@@ -146,15 +149,17 @@ class PortlandCrimeTracker(object):
 
         nearby_points = self.get_points_nearby(point)
 
+        valid_filters, errors = self.validate_filters(filters)
+
         for point in nearby_points:
             crimes = self.crimes[point]
-            if filters:
-                crimes = self.filter(crimes, filters)
+            if valid_filters:
+                crimes = self.filter(crimes, valid_filters)
             nearby_crimes[point].extend(crimes)
 
-        return nearby_crimes
+        return nearby_crimes, errors
 
-    def validate_filters(self, filters):
+    def validate_filters(self, filters, ignore=None):
         """
         Given a list of filter names in ``filters``, return a tuple:
 

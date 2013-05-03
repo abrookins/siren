@@ -1,16 +1,15 @@
 import cPickle
 import collections
 import csv
+import flask
 import ogr
 import os
 
-
-BASE_DIR = os.path.dirname(__file__)
-DATA_DIR = os.path.join(BASE_DIR, "data")
+from siren import default_settings
 
 
 def open_data_file(filename, mode='r'):
-    return open(os.path.join(DATA_DIR, filename), mode)
+    return open(os.path.join(default_settings.DATA_DIR, filename), mode)
 
 
 def get_crime_data(filename):

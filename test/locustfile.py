@@ -3,7 +3,7 @@ from locust import Locust, TaskSet
 
 url = '/crime/stats/%s'
 
-with open('portland_coordinates.txt') as f:
+with open('data/portland_coordinates.txt') as f:
     coords = [l for l in f.read().split('\n') if l]
     tasks = {lambda l: l.client.get(url % coord) for coord in coords}
 
