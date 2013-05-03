@@ -2,7 +2,9 @@
 # add the requirement here because we need to use a custom build-pack for scipy.
 # scipy==0.11.0
 
-GDAL==1.9.1
+# Heorku can't install GDAL with pip, but you need to in your dev environment.
+# GDAL==1.9.1
+
 Flask==0.8
 Flask-Cache==0.8.0
 gunicorn==0.17.4
