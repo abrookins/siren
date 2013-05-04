@@ -19,8 +19,8 @@ if app.config['DEBUG']:
 
 def get_point(latitude, longitude):
     """
-    Return a 400 status if ``latitude`` and ``longitude`` are not coercible to
-    floats.
+    Return ``latitude`` and ``longitude`` coerced to floats.
+    Fail the request with a 400 status if one or both are not coercible.
     """
     try:
         latitude = float(latitude)
