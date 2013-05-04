@@ -46,8 +46,8 @@ def get_crimes(latitude, longitude):
 @jsonp
 def crime_stats(latitude, longitude):
     """
-    Return statistics -- as now, only sums by category -- of crimes within 1/2
-    mile of ``latitude`` and ``longitude``.
+    Return statistics -- as now, only sums by category -- about crimes within
+    1/2 mile of ``latitude`` and ``longitude``.
     """
     nearby_crimes, errors = get_crimes(latitude, longitude)
     stats = crime_db.get_stats_for_crimes(nearby_crimes)
