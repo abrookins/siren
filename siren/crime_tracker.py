@@ -1,4 +1,4 @@
-import collections
+timport collections
 import cPickle
 import itertools
 import datetime
@@ -98,9 +98,8 @@ class PortlandCrimeTracker(object):
 
     def get_points_nearby(self, point, max_points=250):
         """
-        Given a list of coordinate tuples in ``points``, find the nearest
-        points within 1/2 a mile of the tuple ``point``, to a maximum of
-        ``max_points``.
+        Find the nearest points within 1/2 a mile of the tuple ``point``, to a
+        maximum of ``max_points``.
         """
 
         # Find crimes within approximately 1/2 a mile. 1/4 mile is .005,
